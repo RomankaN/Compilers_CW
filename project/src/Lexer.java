@@ -409,7 +409,7 @@ class Lexer implements java_cup.runtime.Scanner {
   /* user code: */
   private boolean debug_mode;
   public  boolean debug()            { return debug_mode; }
-  public  void    debug(boolean mode){ debug_mode = mode; }
+
   
   StringBuffer string = new StringBuffer();
 
