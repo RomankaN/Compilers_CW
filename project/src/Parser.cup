@@ -1,3 +1,4 @@
+
 import java_cup.runtime.*;
 import java.util.ArrayList;
 
@@ -26,7 +27,7 @@ parser code {:
 
     
   terminal LANGLE, RANGLE, LBRACKET, RBRACKET, COMMA, LBRACE, RBRACE,
-  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, VOID, QMARK;
+  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, VOID, QMARK, EOL;
 
   /** primitives **/
   terminal BOOL, CHAR, FLOAT, INTEGER, RATIONAL, NUMBER;
@@ -51,8 +52,8 @@ parser code {:
   /* declarations */
   nonterminal declarations, declaration, main, statements, statement,
   multiple_assignments;
-  nonterminal variable_declaration, function_declaration,
-  type_declaration, alias_declaration;
+  nonterminal variable_declaration, function_declaration, type_declarations, loopStatements, loopStatement,
+  type_declaration, alias_declarations, alias_declaration;
 
   /* low level constructs */
   nonterminal collection, item, type, type_with_top_id, dict_t, sequence_t,
@@ -61,7 +62,7 @@ parser code {:
 
   /* list nonterminals */
   nonterminal sequence_start, sequence_contents, sequence_body,
-  dict_start, dict_contents, dict_body,
+  dict_start, dict_contents, dict_body, assignment, ifbreak,
   type_id_contents, type_id_body, type_id;
 
   /* conditional flow nonterminals */
@@ -102,7 +103,15 @@ declarations ::= declaration SEMICOLON declarations
 
 body ::= variable_declarations
       |  statement statements
+      |  alias_declarations
+      | type_declarations
       ;
+
+alias_declarations ::= alias_declaration SEMICOLON body;
+
+alias_declaration ::= ALIAS type type 
+                    | ALIAS IDENTIFIER IDENTIFIER;
+
 
 variable_declarations ::=  variable_declaration SEMICOLON body;
 
@@ -112,19 +121,20 @@ declaration ::= function_declaration
               | type_declaration
               ;
 
-function_declaration ::= FDEF IDENTIFIER LPAREN type_id_contents
-                      RPAREN LBRACE body RBRACE COLON ftype;
+function_declaration ::=  FDEF IDENTIFIER LPAREN type_id_contents
+                      RPAREN LBRACE body RBRACE ftype;
 
-variable_declaration ::= IDENTIFIER COLON type_with_id ASSIGNMENT multiple_assignments
-                      | type_with_id IDENTIFIER
+variable_declaration ::= IDENTIFIER COLON type_with_id assignment
                       ;
-
+assignment ::= ASSIGNMENT multiple_assignments
+            | 
+            ;
 multiple_assignments ::= multiple_assignments COMMA expression
                       | expression
                       ;
 
+type_declarations ::= type_declaration SEMICOLON body;
 type_declaration ::= TDEF IDENTIFIER LBRACE type_id_contents RBRACE;
-alias_declaration ::= ALIAS type IDENTIFIER;
 
 // expression can resolve to IDENTIFIER through
 // settable -> index_access -> IDENTIFIER
@@ -162,14 +172,16 @@ index_access ::= LBRACKET expression RBRACKET
 
 item ::= CHAR | FLOAT | INTEGER | RATIONAL | BOOL;
 
+
+
 collection ::= STRING_LITERAL
             | dict_start
             | sequence_start
             ;
 
 evaluable ::= NOT expression
-            | LEN LPAREN expression RPAREN
-            | MINUS expression
+            | IDENTIFIER DOT LEN 
+            | MINUS expression 
             | LPAREN expression RPAREN
             | function_call access
             | expression AND expression
@@ -190,12 +202,16 @@ evaluable ::= NOT expression
             ;
 
 type ::= BOOLEAN_T | CHAR_T | dict_t | FLOAT_T | INT_T | RATIONAL_T | sequence_t | STRING_T;
-ftype ::= IDENTIFIER | VOID | type;
+
+ftype ::= COLON IDENTIFIER 
+          | COLON type
+          | 
+          ;
 
 type_with_id ::= type | IDENTIFIER;
 type_with_top_id ::= TOP_T | type | IDENTIFIER;
 
-function_call ::= IDENTIFIER LPAREN sequence_contents RPAREN SEMICOLON;
+function_call ::= predicate IDENTIFIER LPAREN sequence_contents RPAREN;
 
 
 sequence_t ::= SEQ_T LANGLE type_with_top_id RANGLE
@@ -231,29 +247,40 @@ type_id_body ::= type_id_body COMMA type_id
               | type_id
               ;
 
-type_id ::= type IDENTIFIER
-          | IDENTIFIER IDENTIFIER
+type_id ::= IDENTIFIER COLON type
+          | IDENTIFIER COLON IDENTIFIER
           ;
 
 
 
 
 
-loop ::= LOOP statements break POOL;
+loop ::= LOOP loopStatements  POOL;
+loopStatements ::= loopStatements loopStatement
+                 |
+                 ;
 
-break ::= BREAK
-        | BREAKARG
-        | 
+loopStatement ::= ifbreak
+               | loop
+               | expression SEMICOLON
+               | return SEMICOLON
+               | if
+               | settable ASSIGNMENT multiple_assignments SEMICOLON
+               | io_op SEMICOLON;
+               
+ifbreak ::= IF LPAREN expression RPAREN THEN break FI;
+
+break ::= BREAK SEMICOLON
+        | BREAKARG SEMICOLON
         ;
 
-if ::= predicate IF LPAREN expression RPAREN THEN statements else;
+if ::= IF LPAREN expression RPAREN THEN statements else;
      
 
-else ::= ELSE statements FI
+else ::= ELSE statement statement FI
       | FI;
 
 predicate ::= QMARK expression QMARK
-           |
            ;
 
 return ::= RETURN expression

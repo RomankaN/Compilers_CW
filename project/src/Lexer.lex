@@ -9,6 +9,7 @@ import java_cup.runtime.*;
 
 %{
   private boolean debug_mode;
+  private int csline, cscolumn;
   public  boolean debug()            { return debug_mode; }
 
   
@@ -28,7 +29,7 @@ import java_cup.runtime.*;
 %init}
 
 EOL = \r|\n|\r\n
-Whitespace = {EOL}|" "|"\t"
+Whitespace = {EOL}|" "|\t
 /* Comment can be the last line of the file, in which case there is no line terminator */
 Comment1 = "#"[^\n\r]*{EOL}?
 Comment2 = "/#"[^#] ~"#/" | "/#" "#"+ "/"
@@ -45,9 +46,10 @@ Float = {Integer}\.{Digit}*
 Number = (-?{Integer}|{Rational}|{Float})
 Top = (Char|Integer|Bool|Number)
 Dictionary = \<(Top, Top)?\>
-StringCharacter = [^\r\n\"\\]
+StringCharacter = [^\r\n\"]
 BreakArg = "break "{Integer}
 Qmark = \?
+String = \"{StringCharacter}*\"
 
 %state TOKENIZE, STRING
 
@@ -83,10 +85,11 @@ Qmark = \?
   {Qmark}   {
       return token(sym.QMARK);
   }
-	\"            { 
-		string.setLength(0);
-    	yybegin(STRING);
-    }
+  {String} {
+      return token(sym.STRING_LITERAL);
+  }
+	
+
 
    	// seq   	
     "["           { return token(sym.LBRACKET);   }
@@ -107,10 +110,11 @@ Qmark = \?
     	"int"         { return token(sym.INT_T);      }
     	"rat"         { return token(sym.RATIONAL_T); }
     	"top"         { return token(sym.TOP_T);      }
-      "void"        { return token(sym.VOID);     }
+      
     
     	//aggregates
     	"seq"         { return token(sym.SEQ_T);      }
+      "string"        { return token(sym.STRING_T);     }
     	"dict"        { return token(sym.DICT_T);     }
     
     
@@ -167,21 +171,7 @@ Qmark = \?
     {Identifier}  { return token(sym.IDENTIFIER); }
 }
 
-<STRING>{
-  \"            {
-   yybegin(YYINITIAL); 
-   return token(sym.STRING_LITERAL, string.toString()); }
 
-  {StringCharacter}+ { string.append(yytext()); }
-  "\\b"   { string.append( '\b' ); }
-  "\\t"   { string.append( '\t' ); }
-  "\\n"   { string.append( '\n' ); }
-  "\\f"   { string.append( '\f' ); }
-  "\\r"   { string.append( '\r' ); }
-  "\\\""  { string.append( '\"' ); }
-  "\\'"   { string.append( '\'' ); }
-  "\\\\"  { string.append( '\\' ); }
-}
 
 [^] {
   System.out.println("file:" + (yyline+1) +
