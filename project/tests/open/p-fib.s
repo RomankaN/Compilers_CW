@@ -4,7 +4,7 @@ main {
 };
 
 fdef fibonacci( pos : int ) { 
-	if (pos =-1) then
+	if (pos = -1) then
 		return 0;
 	fi
 	if (pos = 0) then

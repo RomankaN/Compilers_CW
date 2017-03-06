@@ -43,7 +43,7 @@ Bool = [T|F]
 Integer = (0|[1-9]{Digit}*)
 Rational = ({Integer}_)?{Integer}"/"{Integer}
 Float = {Integer}\.{Digit}*
-Number = (-?{Integer}|{Rational}|{Float})
+NegativeNumber = -({Integer}|{Rational}|{Float})
 Top = (Char|Integer|Bool|Number)
 Dictionary = \<(Top, Top)?\>
 StringCharacter = [^\r\n\"]
@@ -79,14 +79,15 @@ String = \"{StringCharacter}*\"
   {Rational}    { 
     	return token(sym.RATIONAL);
     }
-  {Number}      {
-      return token(sym.NUMBER);
-  }
+ 
   {Qmark}   {
       return token(sym.QMARK);
   }
   {String} {
       return token(sym.STRING_LITERAL);
+  }
+  {NegativeNumber} {
+      return token(sym.NEGATIVE_NUM);
   }
 	
 

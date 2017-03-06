@@ -19,6 +19,7 @@ public class sym {
   public static final int LPAREN = 11;
   public static final int BADCHAR = 2;
   public static final int MINUS = 44;
+  public static final int NEGATIVE_NUM = 27;
   public static final int RPAREN = 12;
   public static final int TOP_T = 30;
   public static final int NOT = 54;
@@ -46,7 +47,6 @@ public class sym {
   public static final int RETURN = 18;
   public static final int RBRACKET = 6;
   public static final int error = 1;
-  public static final int NUMBER = 27;
   public static final int NEQ = 46;
   public static final int BREAK = 62;
   public static final int BOOLEAN_T = 31;
@@ -101,7 +101,7 @@ public class sym {
   "FLOAT",
   "INTEGER",
   "RATIONAL",
-  "NUMBER",
+  "NEGATIVE_NUM",
   "STRING_LITERAL",
   "SEQ_T",
   "TOP_T",

@@ -30,7 +30,7 @@ parser code {:
   COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, VOID, QMARK, EOL;
 
   /** primitives **/
-  terminal BOOL, CHAR, FLOAT, INTEGER, RATIONAL, NUMBER;
+  terminal BOOL, CHAR, FLOAT, INTEGER, RATIONAL, NEGATIVE_NUM;
 
   /* collection terminals */
   terminal STRING_LITERAL;
@@ -170,7 +170,7 @@ dot_access ::= DOT IDENTIFIER;
 index_access ::= LBRACKET expression RBRACKET
               ;
 
-item ::= CHAR | FLOAT | INTEGER | RATIONAL | BOOL;
+item ::= CHAR | FLOAT | INTEGER | RATIONAL | BOOL | NEGATIVE_NUM | IDENTIFIER NEGATIVE_NUM;
 
 
 
@@ -181,7 +181,7 @@ collection ::= STRING_LITERAL
 
 evaluable ::= NOT expression
             | IDENTIFIER DOT LEN 
-            | MINUS expression 
+            | MINUS expression
             | LPAREN expression RPAREN
             | function_call access
             | expression AND expression
@@ -277,7 +277,7 @@ break ::= BREAK SEMICOLON
 if ::= IF LPAREN expression RPAREN THEN statements else;
      
 
-else ::= ELSE statement statement FI
+else ::= ELSE statement statements FI
       | FI;
 
 predicate ::= QMARK expression QMARK
