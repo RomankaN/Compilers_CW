@@ -5,7 +5,7 @@ main {
 	j : int := 0;
 	loop
 		if (2 < i) then
-			break; 
+		break; 
 		fi
 		loop
 			if (2 < j) then
