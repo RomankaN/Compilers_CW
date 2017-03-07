@@ -1,0 +1,284 @@
+
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+
+parser code {:
+  public Boolean syntaxErrors = false;
+
+  public void syntax_error(Symbol current_token) { report_error(
+         "Syntax error at line " + (current_token.left+1) + ", column "
++ current_token.right, null );
+}
+:}
+
+  terminal BADCHAR;
+
+    
+  terminal LANGLE, RANGLE, LBRACKET, RBRACKET, COMMA, LBRACE, RBRACE,
+  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, VOID, QMARK, EOL;
+
+  /** primitives **/
+  terminal BOOL, CHAR, FLOAT, INTEGER, RATIONAL, NEGATIVE_NUM;
+
+  /* collection terminals */
+  terminal STRING_LITERAL;
+
+  /* language types */
+  terminal SEQ_T, TOP_T, BOOLEAN_T, CHAR_T, DICT_T, FLOAT_T, INT_T, STRING_T,
+  RATIONAL_T;
+
+  /* operators */
+  terminal AND, DIV, EQ, NOTEQ, IN, LTEQ, MINUS, MULT, NEQ, OR, IMPLY,
+  PLUS, ASSIGNMENT, POW, DOT, APPEND, NOT, LEN, IDENTIFIER;
+  terminal IF, FI, ELSE, POOL, LOOP, BREAK, BREAKARG, THEN, PRINT,
+  READ;
+
+  /** parsing constructs **/
+  /* structural constructs */
+  nonterminal program;
+
+  /* declarations */
+  nonterminal declarations, declaration, main, statements, statement,
+  multiple_assignments;
+  nonterminal variable_declaration, function_declaration, type_declarations, loopStatements, loopStatement,
+  type_declaration, alias_declarations, alias_declaration;
+
+  /* low level constructs */
+  nonterminal collection, item, type, type_with_top_id, dict_t, sequence_t,
+  ftype, type_with_id;
+  nonterminal expression, evaluable, function_call;
+
+  /* list nonterminals */
+  nonterminal sequence_start, sequence_contents, sequence_body,
+  dict_start, dict_contents, dict_body, assignment, ifbreak,
+  type_id_contents, type_id_body, type_id;
+
+  /* conditional flow nonterminals */
+  nonterminal loop, break, breakArg;
+
+  /* io_ops */
+  nonterminal io_op, dot_access, access, access_main,
+  return, if, else, settable, index_access, predicate,
+  slice, sliceable;
+
+nonterminal body, variable_declarations;
+
+precedence left PLUS, MINUS, MULT, DIV;  
+precedence left  OR, AND, IMPLY, APPEND, COMMA;
+precedence right POW, IN, ASSIGNMENT;
+precedence nonassoc NOT, LANGLE, LTEQ, RANGLE, EQ, NEQ, QMARK;
+
+start with program;
+
+program ::= declarations main declarations;
+main ::= MAIN LBRACE body RBRACE SEMICOLON;
+
+statements ::= statements statement
+            |
+            ;
+
+statement ::= io_op SEMICOLON
+            | return SEMICOLON
+            | expression SEMICOLON
+            | settable ASSIGNMENT multiple_assignments SEMICOLON
+            | if
+            | loop
+            ;
+
+declarations ::= declaration SEMICOLON declarations
+              |
+              ;
+
+body ::= variable_declarations
+      |  statement statements
+      |  alias_declarations
+      | type_declarations
+      ;
+
+alias_declarations ::= alias_declaration SEMICOLON body;
+
+alias_declaration ::= ALIAS type type 
+                    | ALIAS IDENTIFIER IDENTIFIER;
+
+
+variable_declarations ::=  variable_declaration SEMICOLON body;
+
+declaration ::= function_declaration
+              | variable_declaration
+              | alias_declaration
+              | type_declaration
+              ;
+
+function_declaration ::=  FDEF IDENTIFIER LPAREN type_id_contents
+                      RPAREN LBRACE body RBRACE ftype;
+
+variable_declaration ::= IDENTIFIER COLON type_with_id assignment
+                      ;
+assignment ::= ASSIGNMENT multiple_assignments
+            | 
+            ;
+multiple_assignments ::= multiple_assignments COMMA expression
+                      | expression
+                      ;
+
+type_declarations ::= type_declaration SEMICOLON body;
+type_declaration ::= TDEF IDENTIFIER LBRACE type_id_contents RBRACE;
+
+// expression can resolve to IDENTIFIER through
+// settable -> index_access -> IDENTIFIER
+
+
+
+expression ::= evaluable
+            | slice
+            | settable
+            | collection
+            ;
+
+slice ::= LBRACKET expression COLON expression RBRACKET
+        | LBRACKET COLON expression RBRACKET
+        | LBRACKET expression COLON RBRACKET
+        | LBRACKET COLON RBRACKET
+        ;
+
+settable ::= IDENTIFIER access
+        | collection index_access access_main
+        ;
+
+access ::= access_main
+        |
+        ;
+
+access_main ::= dot_access access
+              | index_access access
+              | slice access
+              ;
+
+dot_access ::= DOT IDENTIFIER;
+index_access ::= LBRACKET expression RBRACKET
+              ;
+
+item ::= CHAR | FLOAT | INTEGER | RATIONAL | BOOL | NEGATIVE_NUM | IDENTIFIER NEGATIVE_NUM;
+
+
+
+collection ::= STRING_LITERAL
+            | dict_start
+            | sequence_start
+            ;
+
+evaluable ::= NOT expression
+            | IDENTIFIER DOT LEN 
+            | MINUS expression
+            | LPAREN expression RPAREN
+            | function_call access
+            | expression AND expression
+            | expression DIV expression
+            | expression EQ expression
+            | expression IN expression
+            | expression LANGLE expression
+            | expression LTEQ expression
+            | expression MINUS expression
+            | expression MULT expression
+            | expression NEQ expression
+            | expression OR expression
+            | expression PLUS expression
+            | expression POW expression
+            | expression APPEND expression
+            | expression IMPLY expression
+            | item
+            ;
+
+type ::= BOOLEAN_T | CHAR_T | dict_t | FLOAT_T | INT_T | RATIONAL_T | sequence_t | STRING_T;
+
+ftype ::= COLON IDENTIFIER 
+          | COLON type
+          | 
+          ;
+
+type_with_id ::= type | IDENTIFIER;
+type_with_top_id ::= TOP_T | type | IDENTIFIER;
+
+function_call ::= predicate IDENTIFIER LPAREN sequence_contents RPAREN;
+
+
+sequence_t ::= SEQ_T LANGLE type_with_top_id RANGLE
+            | SEQ_T LANGLE IDENTIFIER RANGLE;
+
+sequence_start ::= LBRACKET sequence_contents RBRACKET;
+sequence_contents ::= sequence_body
+                |
+                ;
+
+sequence_body ::= expression
+                | sequence_body COMMA expression
+                ;
+
+dict_t ::= DICT_T LANGLE type_with_top_id COMMA type_with_top_id RANGLE
+         ;
+
+dict_start ::= LBRACE dict_contents RBRACE;
+dict_contents ::= dict_body
+              |
+              ;
+
+
+dict_body ::= expression COLON expression
+          | dict_body COMMA expression COLON expression
+          ;
+
+type_id_contents ::= type_id_body
+                  |
+                  ;
+
+type_id_body ::= type_id_body COMMA type_id
+              | type_id
+              ;
+
+type_id ::= IDENTIFIER COLON type
+          | IDENTIFIER COLON IDENTIFIER
+          ;
+
+
+
+
+
+loop ::= LOOP loopStatements  POOL;
+loopStatements ::= loopStatements loopStatement
+                 |
+                 ;
+
+loopStatement ::= ifbreak
+               | loop
+               | expression SEMICOLON
+               | return SEMICOLON
+               | if
+               | settable ASSIGNMENT multiple_assignments SEMICOLON
+               | io_op SEMICOLON;
+               
+ifbreak ::= IF LPAREN expression RPAREN THEN break FI;
+
+break ::= BREAK SEMICOLON
+        | BREAKARG SEMICOLON
+        ;
+
+if ::= IF LPAREN expression RPAREN THEN statements else;
+     
+
+else ::= ELSE statement statements FI
+      | FI;
+
+predicate ::= QMARK expression QMARK
+           ;
+
+return ::= RETURN expression
+        | RETURN
+        ;
+
+
+
+io_op ::= PRINT expression
+      | READ settable
+      ;
+

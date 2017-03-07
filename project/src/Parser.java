@@ -888,21 +888,10 @@ public class Parser extends java_cup.runtime.lr_parser {
 
   public Boolean syntaxErrors = false;
 
-  public void syntax_error(Symbol current_token) {
-    report_error("Syntax error at line " + (current_token.left+1) + ", column "
-        + current_token.right, null
-    );
-    syntaxErrors = true;
-  }
-
-  public void unrecovered_syntax_error(Symbol current_token) {
-    if(!syntaxErrors) {
-      report_error("Syntax error at line " + (current_token.left+1) + ", column "
-          + current_token.right, null
-      );
-      syntaxErrors = true;
-    }
-  }
+  public void syntax_error(Symbol current_token) { report_error(
+         "Syntax error at line " + (current_token.left+1) + ", column "
++ current_token.right, null );
+}
 
 
 /** Cup generated class to encapsulate user supplied action code.*/
