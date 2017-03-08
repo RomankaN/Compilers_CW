@@ -8,7 +8,8 @@ parser code {:
 
   public void syntax_error(Symbol current_token) { report_error(
          "Syntax error at line " + (current_token.left+1) + ", column "
-+ current_token.right, null );
++ current_token.right + "\n", null);
+
 }
 :}
 
@@ -274,6 +275,7 @@ predicate ::= QMARK expression QMARK
 
 return ::= RETURN expression
         | RETURN
+        |
         ;
 
 
