@@ -1,0 +1,17 @@
+Paragraph 2:
+Functions with empty bodies are not allowed in our code. We made this decision based on a test case with an empty main function, which is supposed to fail. Although the coursework specification does not explicitly cover this, we allow functions with no statements provided there is at least one variable/ alias/ function declaration (such functions are still syntactically correct, even though they have no semantic meaning). Note that in the case of an empty main function, the reported error is at line 0, column -1 (by default of CUP). We have not changed this default setting as we believe this makes the error very clear; a positive number indicates an invalid token while a negative number indicates a missing token/ construction.
+
+Paragraph 10:
+This paragraph specifies that index access is allowed with sequences and strings are syntactic sugar for seq<char>. Hence we also allow index access with strings, i.e. "hello"[2] would be valid. We also allow a combination of field access id.field (Paragraph 15) and index acces is also possible in our parser, e.g. seqOfChars[2].field is valid and for the above mentioned reason, "hello"[2].field is also valid (the error would be caught at a later stage, not during parsing).
+
+Paragraph 14:
+"A function’s body consists of local variable declarations, if any, followed by statements." This does not mention alias or function declarations inside of a function. We decided to allow both alias and function declarations inside a function as we consider it appropriate.
+
+Paragraph 15:
+We do not allow function calls on the right side of an assignment or on their own as expressions. We allow index and field access of function calls because a function could possibly return a sequence. To give an example, a statement bar := ?pred?foo()[2].field is valid whereas ?pred?foo() := bar would result in an error.
+
+Paragraph 17:
+We strictly only allow variable declarations before all the statements. 
+
+
+

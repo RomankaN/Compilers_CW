@@ -12,11 +12,10 @@ parser code {:
 }
 :}
 
-  terminal BADCHAR;
 
     
   terminal LANGLE, RANGLE, LBRACKET, RBRACKET, COMMA, LBRACE, RBRACE,
-  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, VOID, QMARK, EOL;
+  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, QMARK, EOL;
 
   /** primitives **/
   terminal BOOL, CHAR, FLOAT, INTEGER, RATIONAL, NEGATIVE_NUM;
@@ -29,7 +28,7 @@ parser code {:
   RATIONAL_T;
 
   /* operators */
-  terminal AND, DIV, EQ, NOTEQ, IN, LTEQ, MINUS, MULT, NEQ, OR, IMPLY,
+  terminal AND, DIV, EQ, IN, LTEQ, MINUS, MULT, NEQ, OR, IMPLY,
   PLUS, ASSIGNMENT, POW, DOT, APPEND, NOT, LEN, IDENTIFIER;
   terminal IF, FI, ELSE, POOL, LOOP, BREAK, BREAKARG, THEN, PRINT,
   READ;
@@ -60,7 +59,7 @@ parser code {:
   /* io_ops */
   nonterminal io_op, dot_access, access, access_main,
   return, if, else, settable, index_access, predicate,
-  slice, sliceable;
+  slice;
 
 nonterminal body, variable_declarations;
 
