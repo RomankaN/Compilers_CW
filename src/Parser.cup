@@ -8,14 +8,16 @@ parser code {:
 
   public void syntax_error(Symbol current_token) { report_error(
          "Syntax error at line " + (current_token.left+1) + ", column "
-+ current_token.right + "\n", null );
++ current_token.right + "\n", null);
+
 }
 :}
 
+  terminal BADCHAR;
 
     
   terminal LANGLE, RANGLE, LBRACKET, RBRACKET, COMMA, LBRACE, RBRACE,
-  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, QMARK, EOL;
+  COLON, LPAREN, RPAREN, MAIN, SEMICOLON, FDEF, TDEF, ALIAS, RETURN, QMARK;
 
   /** primitives **/
   terminal BOOL, CHAR, FLOAT, INTEGER, RATIONAL, NEGATIVE_NUM;
@@ -54,12 +56,12 @@ parser code {:
   type_id_contents, type_id_body, type_id;
 
   /* conditional flow nonterminals */
-  nonterminal loop, break, breakArg;
+  nonterminal loop, break;
 
   /* io_ops */
   nonterminal io_op, dot_access, access, access_main,
   return, if, else, settable, index_access, predicate,
-  slice;
+  slice, sliceable;
 
 nonterminal body, variable_declarations;
 
@@ -73,7 +75,7 @@ start with program;
 program ::= declarations main declarations;
 main ::= MAIN LBRACE body RBRACE SEMICOLON;
 
-statements ::= statements statement
+statements ::= statements statement 
             |
             ;
 
